@@ -1,0 +1,23 @@
+1.  python3 -m venv venv
+    -> source venv/bin/activate
+    -> pip install -r requirements.txt
+
+2.  cp .env.example .env
+
+3.  Create new folder (maybe on Desktop): mkdir $HOME/Desktop/chromeprofile
+    -> Copy the created folder's full path (/Users/<username>/Desktop/chromeprofile)
+    -> Edit the CHROME_PROFILES_PATH value on .env file to: /Users/<username>/Desktop/chromeprofile
+
+4.  Create new chrome profile
+    -> Login tiktok (maybe with google)
+    -> On this new chrome profile, go to: about://version
+    -> Copy the value of "Profile Path"
+    -> cp -R <Profile Path> /Users/<username>/Desktop/chromeprofile/dev
+
+5.  python manage.py makemigrations
+    -> python manage.py migrate
+    -> python manage.py createsuperuser (dev/dev)
+    -> python manage.py runserver
+
+
+API: https://documenter.getpostman.com/view/14485903/2s93zH2KLP

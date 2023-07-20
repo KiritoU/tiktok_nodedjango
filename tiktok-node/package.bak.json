@@ -1,0 +1,43 @@
+{
+  "name": "tiktok-scraper-ts",
+  "version": "1.4.1",
+  "description": "A scraper for tiktok videos, users and more",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "tsc && node dist/main.js",
+    "dev": "tsc && node dist/app.js",
+    "build:docs": "npx typedoc src/main.ts",
+    "build:lib": "npx tsup"
+  },
+  "author": "naseif",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/naseif/tiktok-scraper/issues"
+  },
+  "keywords": [
+    "tiktok-videos-downloader",
+    "tiktok-video-downloader",
+    "tiktok-scraper",
+    "tiktok-downloader",
+    "tiktok-api",
+    "tiktok-videos-scraper"
+  ],
+  "homepage": "https://github.com/naseif/tiktok-scraper#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.1",
+    "@types/node": "^17.0.21",
+    "@types/node-fetch": "^2.6.1",
+    "tsup": "^5.12.0",
+    "typedoc": "^0.22.12",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "express": "^4.17.1",
+    "miniget": "^4.2.2",
+    "netscape-cookies-parser": "^1.0.2",
+    "node-fetch": "^2.6.7",
+    "puppeteer": "^16.0.0",
+    "tiktok-signature": "^1.8.0"
+  }
+}

@@ -1,0 +1,22 @@
+# Environments
+.env
+.venv
+env/
+.env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+000*
+
+# Python
+__pycache__/
+.vscode
+db.sqlite3
+test
+
+captcha
+geckodriver.log
+
+test
