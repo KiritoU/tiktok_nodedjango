@@ -27,7 +27,7 @@ const getFirstPageVideosFromUser = async (
 app.get("/:username", async (req, res) => {
   await getFirstPageVideosFromUser(req.params.username, false)
     .then((videoUrls) => res.json({ data: videoUrls }))
-    .catch((err) => res.json({ error: "Some error occurred" }));
+    .catch((err) => res.json({ error: err }));
 });
 
 app.post("/video", async (req, res) => {
