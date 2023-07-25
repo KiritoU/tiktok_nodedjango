@@ -1,3 +1,5 @@
+import re
+
 from django.shortcuts import render
 from rest_framework import generics, pagination, status
 from rest_framework.exceptions import (
@@ -17,6 +19,7 @@ from .utils import get_response_message, get_user_homepage_video, get_video_no_w
 class CustomError:
     PERMISSION_DENIED = "Bạn không thể thực hiện hành động này"
     UNAUTHORIZED = "Thông tin xác thực không chính xác"
+    UNKNOWN = "Lỗi không xác định"
 
 
 class CustomSuccess:
@@ -59,41 +62,71 @@ class GetUserVideosAPIView(BaseAPIView, generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        username = request.query_params.get("username")
-        urls = get_user_homepage_video(username)
-        urls.reverse()
+        try:
+            username = request.query_params.get("username")
+            urls = get_user_homepage_video(username)
+            urls.reverse()
 
-        tiktok_user, _ = TikTokUser.objects.get_or_create(username=username)
+            tiktok_user, _ = TikTokUser.objects.get_or_create(username=username)
 
-        for url in urls:
-            TikTokUserVideo.objects.get_or_create(user=tiktok_user, url=url)
+            for url in urls:
+                TikTokUserVideo.objects.get_or_create(user=tiktok_user, url=url)
 
-        user_videos = tiktok_user.videos.all()
+            user_videos = tiktok_user.videos.all()
 
-        paginator = self.pagination_class()
-        paginated_videos = paginator.paginate_queryset(user_videos, request)
-        serialized_orders = TikTokUserVideoSerializer(paginated_videos, many=True).data
+            paginator = self.pagination_class()
+            paginated_videos = paginator.paginate_queryset(user_videos, request)
+            serialized_orders = TikTokUserVideoSerializer(
+                paginated_videos, many=True
+            ).data
 
-        return paginator.get_paginated_response(serialized_orders)
+            return paginator.get_paginated_response(serialized_orders)
+        except:
+            return Response(
+                {
+                    "success": 0,
+                    "message": custom_error.UNKNOWN,
+                    "error": "",
+                    "data": [],
+                },
+                status=status.HTTP_200_OK,
+            )
 
 
 class GetVideosNowaterMarkAPIView(BaseAPIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        url = request.data.get("url")
+        try:
+            url = request.data.get("url")
 
-        url = get_video_no_watermark(url)
+            username = re.search(r"/@(.+?)/", url).group(1)
+            tiktok_user, _ = TikTokUser.objects.get_or_create(username=username)
+            video, _ = TikTokUserVideo.objects.get_or_create(user=tiktok_user, url=url)
+            if not video.nowatermark_url:
+                url = get_video_no_watermark(url)
+                video.nowatermark_url = url
+                video.save()
 
-        return Response(
-            {
-                "success": 1,
-                "message": custom_success.SUCCESS,
-                "error": "",
-                "data": url,
-            },
-            status=status.HTTP_200_OK,
-        )
+            return Response(
+                {
+                    "success": 1,
+                    "message": custom_success.SUCCESS,
+                    "error": "",
+                    "data": video.nowatermark_url,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except:
+            return Response(
+                {
+                    "success": 0,
+                    "message": custom_error.UNKNOWN,
+                    "error": "",
+                    "data": [],
+                },
+                status=status.HTTP_200_OK,
+            )
 
 
 class CustomPagination(pagination.LimitOffsetPagination):
