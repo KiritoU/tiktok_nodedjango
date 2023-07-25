@@ -34,7 +34,7 @@ app.post("/video", async (req, res) => {
   const reqUrl = req.body.url;
   await fetchVideoNoWaterMark(reqUrl)
     .then((videoUrl) => res.json({ data: videoUrl }))
-    .catch((err) => res.json({ error: "Some error occurred" }));
+    .catch((err) => res.json({ error: err }));
 });
 
 https: app.listen(port, () => {
