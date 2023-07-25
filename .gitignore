@@ -130,3 +130,5 @@ captcha
 geckodriver.log
 
 test
+
+credential

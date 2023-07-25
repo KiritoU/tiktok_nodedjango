@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 from .models import TikTokUser, TikTokUserVideo
 from .serializers import TikTokUserVideoSerializer
-from .utils import get_response_message, get_user_homepage_video
+from .utils import get_response_message, get_user_homepage_video, get_video_no_watermark
 
 
 class CustomError:
@@ -75,6 +75,25 @@ class GetUserVideosAPIView(BaseAPIView, generics.ListAPIView):
         serialized_orders = TikTokUserVideoSerializer(paginated_videos, many=True).data
 
         return paginator.get_paginated_response(serialized_orders)
+
+
+class GetVideosNowaterMarkAPIView(BaseAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        url = request.data.get("url")
+
+        url = get_video_no_watermark(url)
+
+        return Response(
+            {
+                "success": 1,
+                "message": custom_success.SUCCESS,
+                "error": "",
+                "data": url,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class CustomPagination(pagination.LimitOffsetPagination):
