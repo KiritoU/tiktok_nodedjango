@@ -27,11 +27,11 @@ const getFirstPageVideosFromUser = async (
 app.get("/:username", async (req, res) => {
   await getFirstPageVideosFromUser(req.params.username, false)
     .then((videoUrls) => {
-      console.log(videoUrls);
+      //   console.log(videoUrls);
       res.json({ data: videoUrls });
     })
     .catch((err) => {
-      console.log(err);
+      //   console.log(err);
       res.json({ error: err });
     });
 });
