@@ -77,3 +77,7 @@ export async function hashtag(tag: string) {
 
 export * from "./BL";
 export * from "./Interfaces";
+
+// fetchVideo("https://www.tiktok.com/@luatsubinh/video/7236347885481250053", true)
+//   .then((video) => console.log(video))
+//   .catch((err) => console.error(err));
