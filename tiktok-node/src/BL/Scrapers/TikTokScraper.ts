@@ -317,6 +317,68 @@ export class TTScraper {
     return videos;
   }
 
+  async getAllVideosFromUserWithCursor(
+    username: string,
+    cursor: string = "",
+    noWaterMark?: boolean
+  ): Promise<{ videos: IVideo[]; newCursor: string, isHasMore: boolean }> {
+    if (!username) throw new Error("You must provide a username!");
+
+    const { secretUID } = await this.user(`${username}`);
+
+    if (!secretUID) {
+      throw new Error("Could not find user UID!");
+    }
+
+    const videos: IVideo[] = [];
+    const resultArray = [];
+    const userVideos = await getUserVideos(secretUID, cursor);
+
+    if (userVideos?.itemList) {
+      resultArray.push(userVideos.itemList);
+      cursor = userVideos.cursor;
+    }
+
+    const isHasMore = userVideos?.hasMore === true;
+
+    for (const result of resultArray) {
+      for (const video of result) {
+        videos.push(
+          new Video(
+            video.id,
+            video.desc,
+            new Date(Number(video.createTime) * 1000).toLocaleDateString(),
+            Number(video.video?.height),
+            Number(video.video?.width),
+            Number(video.video?.duration),
+            video.video?.ratio,
+            video?.stats?.shareCount,
+            video?.stats?.diggCount,
+            video?.stats?.commentCount,
+            video?.stats?.playCount,
+            noWaterMark
+              ? await this.noWaterMark(
+                  `https://www.tiktok.com/@${video.author.uniqueId}/video/${video.id}`
+                )
+              : video.video?.downloadAddr.trim(),
+            video?.video?.cover,
+            video?.video?.dynamicCover,
+            noWaterMark
+              ? await this.noWaterMark(
+                  `https://www.tiktok.com/@${video.author.uniqueId}/video/${video.id}`
+                )
+              : video.video?.downloadAddr.trim(),
+            video?.video?.format,
+            video.author,
+            `https://www.tiktok.com/@${video.author.uniqueId}/video/${video.id}`
+          )
+        );
+      }
+    }
+
+    return { videos, newCursor: cursor, isHasMore: isHasMore };
+  }
+
   /**
    * Scrapes the given Link and returns information about the Music of the Video
    * @param link tiktok video url

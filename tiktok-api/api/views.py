@@ -61,26 +61,22 @@ class BaseAPIView(APIView):
 class GetUserVideosAPIView(BaseAPIView, generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
-            username = request.query_params.get("username")
-            urls = get_user_homepage_video(username)
-            urls.reverse()
+            username = request.data.get("username")
+            cursor = request.data.get("cursor")
+            json_response = get_user_homepage_video(username, cursor)
 
-            tiktok_user, _ = TikTokUser.objects.get_or_create(username=username)
+            return Response(
+                {
+                    "success": 1,
+                    "message": custom_success.SUCCESS,
+                    "error": "",
+                    "data": json_response,
+                },
+                status=status.HTTP_200_OK,
+            )
 
-            for url in urls:
-                TikTokUserVideo.objects.get_or_create(user=tiktok_user, url=url)
-
-            user_videos = tiktok_user.videos.all()
-
-            paginator = self.pagination_class()
-            paginated_videos = paginator.paginate_queryset(user_videos, request)
-            serialized_orders = TikTokUserVideoSerializer(
-                paginated_videos, many=True
-            ).data
-
-            return paginator.get_paginated_response(serialized_orders)
         except:
             return Response(
                 {

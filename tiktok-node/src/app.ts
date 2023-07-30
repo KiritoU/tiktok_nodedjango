@@ -24,11 +24,28 @@ const getFirstPageVideosFromUser = async (
   return videoUrls;
 };
 
-app.get("/:username", async (req, res) => {
-  await getFirstPageVideosFromUser(req.params.username, false)
-    .then((videoUrls) => {
+const getUserVideoByCursor = async (username: string, cursor: string = "") => {
+  console.log("Fetching...");
+  const fetchVideos = await TikTokScraper.getAllVideosFromUserWithCursor(
+    username,
+    cursor
+  ); // second argument set to true to fetch the video without watermark
+  const { videos, newCursor, isHasMore } = fetchVideos;
+  //   console.log(videos);
+  //   console.log(newCursor);
+  //   console.log(isHasMore);
+  //   const videoUrls = videos.map((video: IVideo) => video.directVideoUrl);
+
+  return { videos, newCursor, isHasMore };
+};
+
+app.post("", async (req, res) => {
+  const username = req.body.username;
+  const cursor = req.body.cursor;
+  await getUserVideoByCursor(username, cursor)
+    .then(({ videos, newCursor, isHasMore }) => {
       //   console.log(videoUrls);
-      res.json({ data: videoUrls });
+      res.json({ videos, newCursor, isHasMore });
     })
     .catch((err) => {
       //   console.log(err);
