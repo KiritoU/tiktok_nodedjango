@@ -99,21 +99,14 @@ class GetVideosNowaterMarkAPIView(BaseAPIView):
     def post(self, request, *args, **kwargs):
         try:
             url = request.data.get("url")
-
-            username = re.search(r"/@(.+?)/", url).group(1)
-            tiktok_user, _ = TikTokUser.objects.get_or_create(username=username)
-            video, _ = TikTokUserVideo.objects.get_or_create(user=tiktok_user, url=url)
-            if not video.nowatermark_url:
-                url = get_video_no_watermark(url)
-                video.nowatermark_url = url
-                video.save()
+            video = get_video_no_watermark(url)
 
             return Response(
                 {
                     "success": 1,
                     "message": custom_success.SUCCESS,
                     "error": "",
-                    "data": video.nowatermark_url,
+                    "data": video,
                 },
                 status=status.HTTP_200_OK,
             )
