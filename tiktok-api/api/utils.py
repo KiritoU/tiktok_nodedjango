@@ -19,6 +19,14 @@ def get_video_no_watermark(video_url: str) -> str:
     return response.json().get("data", [])
 
 
+def get_tiktok_user_info(username: str) -> str:
+    url = NODE_API_URL + "/user"
+
+    response = requests.post(url, json={"username": username})
+
+    return response.json().get("data", [])
+
+
 def get_response_message(
     data,
     success: int = 0,

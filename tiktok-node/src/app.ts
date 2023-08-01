@@ -2,7 +2,7 @@ import express from "express";
 const bodyParser = require("body-parser");
 import { TTScraper } from "./BL";
 import { IVideo } from "./Interfaces";
-import { fetchVideoNoWaterMark, fetchVideo } from "./main";
+import { fetchVideoNoWaterMark, fetchVideo, fetchUser } from "./main";
 
 const TikTokScraper = new TTScraper();
 
@@ -57,6 +57,13 @@ app.post("/video", async (req, res) => {
   const reqUrl = req.body.url;
   await fetchVideo(reqUrl, true)
     .then((video) => res.json({ data: video }))
+    .catch((err) => res.json({ error: err }));
+});
+
+app.post("/user", async (req, res) => {
+  const username = req.body.username;
+  await fetchUser(username)
+    .then((user) => res.json({ data: user }))
     .catch((err) => res.json({ error: err }));
 });
 
