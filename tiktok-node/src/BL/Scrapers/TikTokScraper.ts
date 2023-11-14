@@ -246,7 +246,6 @@ export class TTScraper {
       userDetails.userInfo.stats.heart,
       userDetails.userInfo.stats.videoCount
     );
-    console.log(userResult);
     return userResult;
   }
 
