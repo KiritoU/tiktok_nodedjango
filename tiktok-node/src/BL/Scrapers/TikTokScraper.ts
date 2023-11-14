@@ -71,6 +71,7 @@ export class TTScraper {
       fetchOptions ? fetchOptions : DefaultOptions
     );
     const res = await req.text();
+    // console.log(res);
     const $ = cheerio.load(res, {
       xmlMode: true,
     });
@@ -85,11 +86,15 @@ export class TTScraper {
 
   private extractJSONObject(html: string) {
     const endofJson = html
-      .split(`<script id="SIGI_STATE" type="application/json">`)[1]
+      .split(
+        `<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">`
+      )[1]
       .indexOf("</script>");
 
     const InfoObject = html
-      .split(`<script id="SIGI_STATE" type="application/json">`)[1]
+      .split(
+        `<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">`
+      )[1]
       .slice(0, endofJson);
 
     return InfoObject;
@@ -141,11 +146,13 @@ export class TTScraper {
   private handleHTMLContent(content: string) {
     const htmlObject = content;
     const removeWindowObject = htmlObject
-      .split("window['SIGI_STATE']=")[1]
+      .split("window['__UNIVERSAL_DATA_FOR_REHYDRATION__']=")[1]
       .indexOf(";window['SIGI_RETRY']=");
 
     const object = JSON.parse(
-      htmlObject.split("window['SIGI_STATE']=")[1].slice(0, removeWindowObject)
+      htmlObject
+        .split("window['__UNIVERSAL_DATA_FOR_REHYDRATION__']=")[1]
+        .slice(0, removeWindowObject)
     );
     return object;
   }
@@ -158,11 +165,13 @@ export class TTScraper {
 
   private async TryFetch(link: string) {
     const $ = await this.requestWebsite(link);
-    if (!this.checkJSONExisting($("#SIGI_STATE").text())) {
+    if (
+      !this.checkJSONExisting($("#__UNIVERSAL_DATA_FOR_REHYDRATION__").text())
+    ) {
       const videoJson = await this.requestWithPuppeteer(link);
       return JSON.parse(videoJson);
     } else {
-      return JSON.parse($("#SIGI_STATE").text());
+      return JSON.parse($("#__UNIVERSAL_DATA_FOR_REHYDRATION__").text());
     }
   }
 
@@ -217,7 +226,9 @@ export class TTScraper {
     if (!username) throw new Error("Please enter a username");
 
     let infoObject = await this.TryFetch(`https://www.tiktok.com/@${username}`);
-    const userObject = infoObject.UserModule.users[username];
+    const userDetails = infoObject.__DEFAULT_SCOPE__["webapp.user-detail"];
+
+    const userObject = userDetails.userInfo.user;
 
     const userResult: IUser = new User(
       userObject.id,
@@ -230,11 +241,12 @@ export class TTScraper {
       userObject.secUid,
       userObject?.bioLink?.link,
       userObject.privateAccount,
-      infoObject.UserModule.stats[username].followerCount,
-      infoObject.UserModule.stats[username].followingCount,
-      infoObject.UserModule.stats[username].heart,
-      infoObject.UserModule.stats[username].videoCount
+      userDetails.userInfo.stats.followerCount,
+      userDetails.userInfo.stats.followingCount,
+      userDetails.userInfo.stats.heart,
+      userDetails.userInfo.stats.videoCount
     );
+    console.log(userResult);
     return userResult;
   }
 
@@ -321,7 +333,7 @@ export class TTScraper {
     username: string,
     cursor: string = "",
     noWaterMark?: boolean
-  ): Promise<{ videos: IVideo[]; newCursor: string, isHasMore: boolean }> {
+  ): Promise<{ videos: IVideo[]; newCursor: string; isHasMore: boolean }> {
     if (!username) throw new Error("You must provide a username!");
 
     const { secretUID } = await this.user(`${username}`);

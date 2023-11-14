@@ -44,7 +44,6 @@ app.post("", async (req, res) => {
   const cursor = req.body.cursor;
   await getUserVideoByCursor(username, cursor)
     .then(({ videos, newCursor, isHasMore }) => {
-      //   console.log(videoUrls);
       res.json({ videos, newCursor, isHasMore });
     })
     .catch((err) => {
